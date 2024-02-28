@@ -1,0 +1,42 @@
+name: New Package PR Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches:
+      - main  # Adjust the branch name as needed
+
+jobs:
+  tag_new_package_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if PR is for a new package
+        id: check_new_package
+        run: |
+          pr_title=$(echo "${{ github.event.pull_request.title }}" | tr '[:upper:]' '[:lower:]')
+          if [[ $pr_title == *"new package"* ]]; then
+            echo "::set-output name=new_package::true"
+          else
+            echo "::set-output name=new_package::false"
+          fi
+
+      - name: Tag PR if it's for a new package
+        if: steps.check_new_package.outputs.new_package == 'true'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const newPackageName = 'new-package';
+            const owner = context.payload.repository.owner.login;
+            const repo = context.payload.repository.name;
+            const prNumber = context.payload.pull_request.number;
+            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+            await octokit.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: [newPackageName]
+            });
+
