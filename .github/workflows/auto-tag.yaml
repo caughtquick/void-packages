@@ -1,0 +1,43 @@
+name: New Package PR Workflow
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  check_new_package_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch GitHub Token
+        id: fetch_token
+        run: echo "TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Check if PR is for a new package
+        id: check_new_package
+        run: |
+          pr_title=$(echo "${{ github.event.pull_request.title }}" | tr '[:upper:]' '[:lower:]')
+          if [[ $pr_title == *"new package"* ]]; then
+            echo "NEW_PACKAGE=true" >> $GITHUB_ENV
+          else
+            echo "NEW_PACKAGE=false" >> $GITHUB_ENV
+          fi
+
+      - name: Add 'new-package' label if PR is for a new package
+        if: env.NEW_PACKAGE == 'true'
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const token = process.env.TOKEN;
+            const octokit = new github.GitHub(token);
+
+            await octokit.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: ['new-package']
+            });
+
