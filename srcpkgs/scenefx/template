@@ -1,0 +1,14 @@
+# Template file for 'scenefx'
+pkgname=scenefx
+version=0.1
+revision=1
+build_style=meson
+hostmakedepends=""
+makedepends="wlroots0.17-devel libglvnd-devel wayland-devel wayland-protocols libdrm-devel pixman-devel"
+depends=""
+short_desc="A drop in Scene API replacement allowing for eye-candy in Wayland compositors"
+maintainer="caughtquick <abhijit@sipahimalani.me>"
+license="MIT"
+homepage="https://github.com/wlrfx/scenefx"
+distfiles="https://github.com/wlrfx/scenefx/archive/refs/tags/${version}.tar.gz"
+checksum=f5c889f4c826a4216628bf1e7e48071fc33e7774b5e3d51e6fee6e571e420827
